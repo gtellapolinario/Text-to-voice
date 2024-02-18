@@ -1,10 +1,7 @@
 # https://github.com/gtellapolinario/Text-to-voice/streamlit_app.py
 # Aplicativo streamlit text to speech openai 
-
 import streamlit as st
 from openai import OpenAI
-
-
 # Configuração da barra lateral com informações fixas
 st.sidebar.title("Sobre o Projeto")
 st.sidebar.info("""
@@ -13,14 +10,12 @@ st.sidebar.info("""
             - [Obsidian-Publish](https://dr-guilhermeapolinario.com)
             - [Exemplos de gravação](https://dr-guilhermeapolinario.com/2.+%C3%81reas/Aprendizado/Exemplos+de+voz+api+Openai)
                 """)
-
 st.sidebar.title("Informações")
 st.sidebar.info(""" 
             Aplicativo de conversão direta de texto para áudio, utilizando a API da OpenAI. 
             É necessário inserir a chave da API que você copia em sua conta OpenAI. 
             Para copiar a chave acesso o site: [OpenAI API Keys](https://platform.openai.com/api-keys)
             """)
-
 st.title("Conversor de Texto em Áudio")
 
 # Campo para inserção da chave da API
