@@ -68,5 +68,3 @@ def converter_texto_em_audio(voice):
 
     # Link para amostras de voz
     st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
-else:
-    st.warning("Por favor, insira sua chave da API da OpenAI para usar o aplicativo.")
