@@ -1,7 +1,7 @@
 # https://github.com/gtellapolinario/Text-to-voice/streamlit_app.py
 # Aplicativo streamlit text to speech openai 
 import streamlit as st
-from openai import OpenAI
+import openai
 import asyncio
 import threading
 
