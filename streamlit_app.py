@@ -5,7 +5,6 @@ from openai import OpenAI
 import asyncio
 import threading
 
-# Configuração da barra lateral com informações fixas
 st.sidebar.title("Sobre o Projeto")
 st.sidebar.info("""
             Este projeto foi desenvolvido por Dr. Guilherme Apolinário, médico com interesse em tecnologia aplicada à saúde.
@@ -25,7 +24,6 @@ st.title("Conversor de Texto em Áudio")
 
 def run_async_code(api_key):
     async def async_code():
-        # Substitua isso pelo seu código assíncrono
         await asyncio.sleep(1)
         print("Async operation complete")
 
@@ -36,14 +34,10 @@ def run_async_code(api_key):
 api_key = st.text_input("Insira sua chave da API da OpenAI:", type="password")
 
 if api_key:
-    # Executa a função assíncrona em uma thread separada
+    # função assíncrona
     threading.Thread(target=run_async_code, args=(api_key,)).start()
-# Campo para inserção da chave da API
+# chave da API
 chave_api = st.text_input("Insira sua chave da API da OpenAI:", type="password")
-
-# Inicializa o cliente da OpenAI se a chave da API for fornecida
-# if chave_api:
-#     client = OpenAI(api_key=chave_api)
 
     # Campo de entrada de texto
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
@@ -51,10 +45,10 @@ texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
 # Seletor de velocidade
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 
-# Voze disponíveis da API
+# Voze da API
 vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
-# Função para converter texto em áudio
+# Função texto em áudio
 def converter_texto_em_audio(voice):
     if texto_usuario:
         response = client.audio.speech.create(
@@ -63,8 +57,7 @@ def converter_texto_em_audio(voice):
             input=texto_usuario,
             speed=velocidade_voz
         )
-        
-        # Salvar e reproduzir o áudio
+           
         audio_file_path = "output.mp3"
         response.stream_to_file(audio_file_path)
         st.audio(audio_file_path, format='audio/mp3')
