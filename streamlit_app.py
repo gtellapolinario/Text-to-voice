@@ -21,8 +21,8 @@ st.sidebar.info("""
             Para copiar a chave acesso o site: [OpenAI API Keys](https://platform.openai.com/api-keys)
             """)
 
-    texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
-    st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
+texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
+st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
     if 'OPENAI_API_KEY' in st.secrets:
         st.success('API key already provided!', icon='✅')
         openai.api_key = st.secrets['OPENAI_API_KEY']
