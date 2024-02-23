@@ -35,10 +35,11 @@ else:
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
+client = openai.api_key
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
     if texto_usuario:
-        response = openai.api_key.audio.speech.create(
+        response = client.audio.speech.create(
             model="tts-1",
             voice=voice,
             input=texto_usuario,
