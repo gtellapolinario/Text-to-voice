@@ -2,10 +2,10 @@
 # Aplicativo streamlit text to speech openai 
 import os
 import tempfile
-
+import openai
 import requests
 import streamlit as st
-from openai import OpenAI
+#from openai import OpenAI
 
 st.sidebar.title("Sobre o Projeto")
 st.sidebar.info("""
@@ -23,8 +23,13 @@ st.sidebar.info("""
 st.title("Conversor de Texto em Áudio")
 
 # Acesso à chave API de forma segura
+# api_key = st.secrets["OPENAI_API_KEY"]
+# client = OpenAI(api_key=api_key)
+
 api_key = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=api_key)
+openai.api_key = api_key  # Configuração da chave API
+
+
 
 # Campo de entrada de texto
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
