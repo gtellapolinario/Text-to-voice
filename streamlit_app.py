@@ -5,7 +5,6 @@ import tempfile
 import openai
 import requests
 import streamlit as st
-#from openai import OpenAI
 
 st.sidebar.title("Sobre o Projeto")
 st.sidebar.info("""
@@ -14,6 +13,7 @@ st.sidebar.info("""
             - [Obsidian-Publish](https://dr-guilhermeapolinario.com)
             - [Exemplos de gravação](https://dr-guilhermeapolinario.com/2.+%C3%81reas/Aprendizado/Exemplos+de+voz+api+Openai)
                 """)
+
 st.sidebar.title("Informações")
 st.sidebar.info(""" 
             Aplicativo de conversão direta de texto para áudio, utilizando a API da OpenAI. 
@@ -23,15 +23,16 @@ st.sidebar.info("""
 
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
+
 if 'OPENAI_API_KEY' in st.secrets:
-            st.success('API key already provided!', icon='✅')
-                        openai.api_key = st.secrets['OPENAI_API_KEY']
-            else:
-                        openai.api_key = st.text_input('Digite sua chave de API:', type='password')
-                                    if not (openai.api_key.startswith('sk-') and len(openai.api_key)==51):
-                                                            st.warning('Digite sua chave de API!', icon='⚠️')
-                                                else:            
-                                                            st.success(texto_usuario, icon='👉')
+    st.success('API key already provided!', icon='✅')
+    openai.api_key = st.secrets['OPENAI_API_KEY']
+else:
+    openai.api_key = st.text_input('Digite sua chave de API:', type='password')
+    if not (openai.api_key.startswith('sk-') and len(openai.api_key)==51):
+        st.warning('Digite sua chave de API!', icon='⚠️')
+    else:            
+        st.success(texto_usuario, icon='👉')
 
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 
@@ -74,4 +75,5 @@ for voz in vozes_disponiveis:
 
 # Link para amostras de voz
 st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
+
 
