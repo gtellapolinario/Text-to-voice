@@ -22,14 +22,8 @@ st.sidebar.info("""
             """)
 st.title("Conversor de Texto em Áudio")
 
-# Acesso à chave API de forma segura
-# api_key = st.secrets["OPENAI_API_KEY"]
-# client = OpenAI(api_key=api_key)
-
 api_key = st.secrets["OPENAI_API_KEY"]
 openai.api_key = api_key  # Configuração da chave API
-
-
 
 # Campo de entrada de texto
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
