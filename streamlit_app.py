@@ -21,29 +21,11 @@ st.sidebar.info("""
             """)
 st.title("Conversor de Texto em Áudio")
 
-
-
-def run_async_code(api_key):
-    async def async_code():
-        # Substitua isso pelo seu código assíncrono
-        await asyncio.sleep(1)
-        print("Async operation complete")
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(async_code())
-    api_key = st.text_input("Insira sua chave da API da OpenAI:", type="password")
-
-    if api_key:
-        # Executa a função assíncrona em uma thread separada
-        threading.Thread(target=run_async_code, args=(api_key,)).start()
-    # Campo para inserção da chave da API
-chave_api = st.text_input("Insira sua chave da API da OpenAI:", type="password")
-
-# Inicializa o cliente da OpenAI se a chave da API for fornecida
-# if chave_api:
-#     client = OpenAI(api_key=chave_api)
-
-    # Campo de entrada de texto
+# OpenAI API Key
+api_key = db.secrets.get(name="OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
+    
+# Campo de entrada de texto
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
 
 # Seletor de velocidade
