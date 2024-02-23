@@ -38,8 +38,8 @@ vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 client = openai.api_key
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
-    if texto_usuario:
-        response = client.audio.speech.create(
+    if texto_usuario and openai.api_key:
+        response = openai.Audio.create(
             model="tts-1",
             voice=voice,
             input=texto_usuario,
