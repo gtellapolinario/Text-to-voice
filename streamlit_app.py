@@ -20,15 +20,19 @@ st.sidebar.info("""
             É necessário inserir a chave da API que você copia em sua conta OpenAI. 
             Para copiar a chave acesso o site: [OpenAI API Keys](https://platform.openai.com/api-keys)
             """)
-st.title("Conversor de Texto em Áudio")
 
-api_key = st.secrets["OPENAI_API_KEY"]
-openai.api_key = api_key  # Configuração da chave API
+    texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
+    st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
+    if 'OPENAI_API_KEY' in st.secrets:
+        st.success('API key already provided!', icon='✅')
+        openai.api_key = st.secrets['OPENAI_API_KEY']
+    else:
+        openai.api_key = st.text_input('Digite sua chave de API:', type='password')
+        if not (openai.api_key.startswith('sk-') and len(openai.api_key)==51):
+            st.warning('Digite sua chave de API!', icon='⚠️')
+        else:
+            st.success(texto_usuario, icon='👉')
 
-# Campo de entrada de texto
-texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
-
-# Seletor de velocidade
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 
 # Vozes disponíveis da API
