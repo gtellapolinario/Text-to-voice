@@ -39,7 +39,7 @@ vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 def converter_texto_em_audio(voice):
     if texto_usuario:
         response = client.audio.speech.create(
-            model="text:fastspeech2",
+            model="tts-1",
             voice=voice,
             input=texto_usuario,
             speed=velocidade_voz
