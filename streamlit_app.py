@@ -33,29 +33,15 @@ else:
 
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
-    if not openai_import_success:
-        st.error("A biblioteca OpenAI não está disponível. Por favor, instale-a e reinicie o aplicativo.")
-        return
-    if not client:
-        st.error("Por favor, forneça uma chave API OpenAI válida.")
-        return
-    if not texto_usuario:
-        st.error("Por favor, insira algum texto para converter.")
-        return
-    
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-            temp_path = Path(temp_file.name)
-        
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+        temp_path = Path(temp_file.name)
         response = client.audio.speech.create(
             model=model_selection,
             voice=voice,
             input=texto_usuario,
             speed=velocidade_voz
         )
-        
         response.stream_to_file(temp_path)
-        
         with open(temp_path, "rb") as audio_file:
             audio_bytes = audio_file.read()
             st.audio(audio_bytes, format="audio/mp3")
@@ -65,21 +51,8 @@ def converter_texto_em_audio(voice):
                 file_name="narration.mp3",
                 mime="audio/mp3",
             )
-        
-        # Limpar o arquivo temporário
-        temp_path.unlink()
-        
-    except Exception as e:
-        st.error(f"Ocorreu um erro: {str(e)}")
-
-# Botões para seleção de voz
-if openai_import_success:
-    cols = st.columns(3)
+        temp_path.unlink()       
+cols = st.columns(3)
     for idx, voz in enumerate(vozes_disponiveis):
         with cols[idx % 3]:
             st.button(f"Voz {voz.capitalize()}", on_click=converter_texto_em_audio, args=(voz,), key=f"btn_{voz}")
-
-    # Link para amostras de voz
-    st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
-else:
-    st.warning("Funcionalidades desativadas devido a problemas na importação da biblioteca OpenAI.")
