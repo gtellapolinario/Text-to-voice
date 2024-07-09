@@ -1,23 +1,18 @@
 import streamlit as st
 import tempfile
 from pathlib import Path
+import streamlit as st
+from openai import OpenAI
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
 
-# Tentar importar OpenAI
-try:
-    from openai import OpenAI
-    openai_import_success = True
-except ImportError:
-    openai_import_success = False
-    st.error("Erro ao importar a biblioteca OpenAI. Por favor, instale-a usando 'pip install --upgrade openai'")
-
-# Sidebar para entrada de chave API e seleção de modelo
 with st.sidebar:
     openai_api_key = st.text_input("OpenAI API Key", type="password")
     st.markdown("[Pegue aqui sua chave OpenAI API](https://platform.openai.com/account/api-keys)")
-    model_selection = st.radio("Qualidade:", ("tts-1", "tts-1-hd"))
+    if openai_api_key:
+        client = OpenAI(api_key=openai_api_key)
+     model_selection = st.radio("Qualidade:", ("tts-1", "tts-1-hd"))
     if st.button("Reiniciar"):
         st.session_state.clear()
         st.experimental_rerun()
@@ -25,32 +20,14 @@ with st.sidebar:
         if "messages" in st.session_state:
             del st.session_state["messages"]
         st.experimental_rerun()
-
-st.sidebar.title("")
-st.sidebar.markdown("""
-#
-                ## Sobre o Projeto
-                ### Conversor de texto em áudio com a api Openai.
-            #
-            - **GitHub:** [Link do projeto](https://github.com/gtellapolinario/Text-to-voice)
-            ######
-            - [Exemplos de gravação](https://dr-guilhermeapolinario.com/2.+%C3%81reas/Aprendizado/Exemplos+de+voz+api+Openai)
-            *by* Dr. Guilherme Apolinário
-                
-                """)
-
 # Área principal para entrada de texto e controles
 texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
-# Inicializar o cliente OpenAI
-client = None
 if openai_import_success and openai_api_key:
     client = OpenAI(api_key=openai_api_key)
     st.success("API key configurada com sucesso!")
-elif not openai_import_success:
-    st.warning("A biblioteca OpenAI não foi importada corretamente. Verifique a instalação.")
 else:
     st.warning('Por favor, insira sua chave OpenAI API na barra lateral.')
 
