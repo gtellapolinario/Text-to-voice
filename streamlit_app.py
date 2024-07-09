@@ -1,15 +1,21 @@
+import streamlit as st
 import tempfile
 from pathlib import Path
-import streamlit as st
-from openai import OpenAI
-import openai
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
-client = OpenAI(api_key=openai_api_key)
+
+# Tentar importar OpenAI
+try:
+    from openai import OpenAI
+    openai_import_success = True
+except ImportError:
+    openai_import_success = False
+    st.error("Erro ao importar a biblioteca OpenAI. Por favor, instale-a usando 'pip install --upgrade openai'")
+
 # Sidebar para entrada de chave API e seleção de modelo
 with st.sidebar:
-    openai_api_key = st.text_input("OpenAI_API_Key", type="password")
+    openai_api_key = st.text_input("OpenAI API Key", type="password")
     st.markdown("[Pegue aqui sua chave OpenAI API](https://platform.openai.com/account/api-keys)")
     model_selection = st.radio("Qualidade:", ("tts-1", "tts-1-hd"))
     if st.button("Reiniciar"):
@@ -40,14 +46,19 @@ vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
 # Inicializar o cliente OpenAI
 client = None
-if openai_api_key:
+if openai_import_success and openai_api_key:
     client = OpenAI(api_key=openai_api_key)
     st.success("API key configurada com sucesso!")
+elif not openai_import_success:
+    st.warning("A biblioteca OpenAI não foi importada corretamente. Verifique a instalação.")
 else:
     st.warning('Por favor, insira sua chave OpenAI API na barra lateral.')
 
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
+    if not openai_import_success:
+        st.error("A biblioteca OpenAI não está disponível. Por favor, instale-a e reinicie o aplicativo.")
+        return
     if not client:
         st.error("Por favor, forneça uma chave API OpenAI válida.")
         return
@@ -85,10 +96,13 @@ def converter_texto_em_audio(voice):
         st.error(f"Ocorreu um erro: {str(e)}")
 
 # Botões para seleção de voz
-cols = st.columns(3)
-for idx, voz in enumerate(vozes_disponiveis):
-    with cols[idx % 3]:
-        st.button(f"Voz {voz.capitalize()}", on_click=converter_texto_em_audio, args=(voz,), key=f"btn_{voz}")
+if openai_import_success:
+    cols = st.columns(3)
+    for idx, voz in enumerate(vozes_disponiveis):
+        with cols[idx % 3]:
+            st.button(f"Voz {voz.capitalize()}", on_click=converter_texto_em_audio, args=(voz,), key=f"btn_{voz}")
 
-# Link para amostras de voz
-st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
+    # Link para amostras de voz
+    st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
+else:
+    st.warning("Funcionalidades desativadas devido a problemas na importação da biblioteca OpenAI.")
