@@ -1,7 +1,7 @@
-import os
 import tempfile
-import openai
+from pathlib import Path
 import streamlit as st
+from openai import OpenAI
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
@@ -37,16 +37,17 @@ texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
-# Set API key
+# Inicializar o cliente OpenAI
+client = None
 if openai_api_key:
-    openai.api_key = openai_api_key
+    client = OpenAI(api_key=openai_api_key)
     st.success("API key configurada com sucesso!")
 else:
     st.warning('Por favor, insira sua chave OpenAI API na barra lateral.')
 
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
-    if not openai_api_key:
+    if not client:
         st.error("Por favor, forneça uma chave API OpenAI válida.")
         return
     if not texto_usuario:
@@ -54,33 +55,31 @@ def converter_texto_em_audio(voice):
         return
     
     try:
-        response = openai.audio.speech.create(
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+            temp_path = Path(temp_file.name)
+        
+        response = client.audio.speech.create(
             model=model_selection,
             voice=voice,
             input=texto_usuario,
             speed=velocidade_voz
         )
         
-        # Get the audio content
-        audio_content = response.content
+        response.stream_to_file(temp_path)
         
-        if audio_content:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-                fp.write(audio_content)
-                fp.seek(0)
-                st.audio(fp.name, format="audio/mp3")
-                # Reset file pointer for download
-                fp.seek(0)
-                # Create a download button for the audio file
-                st.download_button(
-                    label="Download audio",
-                    data=fp.read(),
-                    file_name="narration.mp3",
-                    mime="audio/mp3",
-                )
-            os.unlink(fp.name)  # Clean up the temporary file
-        else:
-            st.error("Não foi possível gerar o áudio. Por favor, tente novamente.")
+        with open(temp_path, "rb") as audio_file:
+            audio_bytes = audio_file.read()
+            st.audio(audio_bytes, format="audio/mp3")
+            st.download_button(
+                label="Download audio",
+                data=audio_bytes,
+                file_name="narration.mp3",
+                mime="audio/mp3",
+            )
+        
+        # Limpar o arquivo temporário
+        temp_path.unlink()
+        
     except Exception as e:
         st.error(f"Ocorreu um erro: {str(e)}")
 
