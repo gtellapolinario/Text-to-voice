@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 import streamlit as st
 from openai import OpenAI
+import openai
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
