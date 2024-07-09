@@ -41,9 +41,8 @@ vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 # Set API key
 if openai_api_key:
     openai.api_key = openai_api_key
-    st.success('API key provided!', icon='✅')
 else:
-    st.warning('Please enter your OpenAI API key.', icon='⚠️')
+    st.st.text_input('Entre com sua chave OpenAI.')
 
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
