@@ -1,10 +1,11 @@
 import os
 import tempfile
 import openai
-import requests
 import streamlit as st
 
-st.title('#### 🤖💬 Conversor de Texto em Áudio OpenAI')
+st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
+
+st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
 
 # Move API key input to main area
 openai_api_key = st.text_input("OpenAI API Key", type="password")
@@ -46,35 +47,43 @@ else:
 
 # Função para converter texto em áudio
 def converter_texto_em_audio(voice):
-    if texto_usuario and openai.api_key:
-        try:
-            response = openai.Audio.create(
-                model=model_selection,
-                voice=voice,
-                input=texto_usuario,
-                speed=velocidade_voz
-            )
-            # Verifica se a resposta é bem-sucedida e reproduz o áudio
-            audio_bytes = response.content
-            if len(audio_bytes) > 0:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
-                    fp.write(audio_bytes)
-                    fp.seek(0)
-                    st.audio(fp.name, format="audio/mp3")
-                    # Reset file pointer for download
-                    fp.seek(0)
-                    # Create a download button for the audio file
-                    st.download_button(
-                        label="Download audio",
-                        data=fp.read(),
-                        file_name="narration.mp3",
-                        mime="audio/mp3",
-                    )
-                os.unlink(fp.name)  # Clean up the temporary file
-            else:
-                st.error("Não foi possível gerar o áudio. Por favor, tente novamente.")
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+    if not openai_api_key:
+        st.error("Please provide an OpenAI API key.")
+        return
+    if not texto_usuario:
+        st.error("Please enter some text to convert.")
+        return
+    
+    try:
+        response = openai.audio.speech.create(
+            model=model_selection,
+            voice=voice,
+            input=texto_usuario,
+            speed=velocidade_voz
+        )
+        
+        # Get the audio content
+        audio_content = response.content
+        
+        if audio_content:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
+                fp.write(audio_content)
+                fp.seek(0)
+                st.audio(fp.name, format="audio/mp3")
+                # Reset file pointer for download
+                fp.seek(0)
+                # Create a download button for the audio file
+                st.download_button(
+                    label="Download audio",
+                    data=fp.read(),
+                    file_name="narration.mp3",
+                    mime="audio/mp3",
+                )
+            os.unlink(fp.name)  # Clean up the temporary file
+        else:
+            st.error("Não foi possível gerar o áudio. Por favor, tente novamente.")
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
 
 # Botões para seleção de voz
 for voz in vozes_disponiveis:
