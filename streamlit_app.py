@@ -5,10 +5,10 @@ from openai import OpenAI
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
 st.title('🤖💬 Conversor de Texto em Áudio OpenAI')
-
+client = OpenAI(api_key=openai_api_key)
 # Sidebar para entrada de chave API e seleção de modelo
 with st.sidebar:
-    openai_api_key = st.text_input("OpenAI API Key", type="password")
+    openai_api_key = st.text_input("OpenAI_API_Key", type="password")
     st.markdown("[Pegue aqui sua chave OpenAI API](https://platform.openai.com/account/api-keys)")
     model_selection = st.radio("Qualidade:", ("tts-1", "tts-1-hd"))
     if st.button("Reiniciar"):
