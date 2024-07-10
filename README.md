@@ -11,3 +11,8 @@ qualidade do áudio.
 ### Funcionamento:
 
 Adicione sua chave de api, cole o texto e pronto.
+
+
+### O app no ar:
+
+https://text-to-voice-gtell.streamlit.app/
