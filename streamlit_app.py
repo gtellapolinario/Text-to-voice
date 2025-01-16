@@ -1,71 +1,110 @@
 import tempfile
 from pathlib import Path
+
 import streamlit as st
 from openai import OpenAI
+from pydub import AudioSegment
 
-st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI", page_icon="🤖")
+st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI",
+                   page_icon="🤖")
 
-# Configuração da barra lateral
 with st.sidebar:
     openai_api_key = st.text_input("OpenAI API Key", type="password")
     model_selection = st.radio("Qualidade:", ("tts-1", "tts-1-hd"))
     if st.button("Reiniciar"):
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
     if st.button("Limpar Conversa"):
         if "messages" in st.session_state:
             del st.session_state["messages"]
-        st.experimental_rerun()
-
-# Interface principal
-texto_usuario = st.text_area("Digite ou cole o texto aqui:", max_chars=4096)
+        st.rerun()
+        
+texto_usuario = st.text_area("Digite ou cole o texto aqui:")
 velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
-vozes_disponiveis = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+vozes_disponiveis = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']
 
-# Inicialização do cliente OpenAI
-client = None
-if openai_api_key:
-    client = OpenAI(api_key=openai_api_key)
+def split_text(text, max_length=4096):
+    """
+    Divide o texto em chunks de tamanho máximo especificado.
+    Tenta dividir no último espaço antes do limite para evitar cortar palavras.
+    """
+    chunks = []
+    start = 0
+    while start < len(text):
+        end = start + max_length
+        if end >= len(text):
+            chunks.append(text[start:])
+            break
+        last_space = text.rfind(' ', start, end)
+        if last_space == -1 or last_space < start:
+            last_space = end
+        chunks.append(text[start:last_space])
+        start = last_space
+    return chunks
 
 def converter_texto_em_audio(voice):
+    client = OpenAI(api_key=openai_api_key)
     if not openai_api_key:
         st.error("Por favor, insira sua chave API OpenAI na barra lateral.")
         return
-    if not texto_usuario:
+    if not texto_usuario.strip():
         st.error("Por favor, insira algum texto para converter.")
         return
-    
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-            temp_path = Path(temp_file.name)
-        
-        response = client.audio.speech.create(
-            model=model_selection,
-            voice=voice,
-            input=texto_usuario,
-            speed=velocidade_voz
-        )
-        response.stream_to_file(temp_path)
-        
-        with open(temp_path, "rb") as audio_file:
-            audio_bytes = audio_file.read()
-            st.audio(audio_bytes, format="audio/mp3")
-            st.download_button(
-                label="Download audio",
-                data=audio_bytes,
-                file_name="narration.mp3",
-                mime="audio/mp3",
-            )
-        
-        temp_path.unlink()  # Remove o arquivo temporário
+        chunks = split_text(texto_usuario, max_length=4096)
+        st.info(f"Texto dividido em {len(chunks)} partes.")
+
+        audio_segments = []
+
+        for idx, chunk in enumerate(chunks):
+            st.write(f"Processando parte {idx + 1} de {len(chunks)}...")
+            with tempfile.NamedTemporaryFile(delete=False,
+                                             suffix=".mp3") as temp_file:
+                temp_path = Path(temp_file.name)
+            response = client.audio.speech.create(model=model_selection,
+                                                  voice=voice,
+                                                  input=chunk,
+                                                  speed=velocidade_voz)
+            response.stream_to_file(temp_path)
+
+            segment = AudioSegment.from_mp3(temp_path)
+            audio_segments.append(segment)
+
+            temp_path.unlink()
+
+        if audio_segments:
+            audio_completo = audio_segments[0]
+            for segment in audio_segments[1:]:
+                audio_completo += segment
+           
+            with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=".mp3") as final_audio_file:
+                final_audio_path = Path(final_audio_file.name)
+            audio_completo.export(final_audio_path, format="mp3")
+
+            with open(final_audio_path, "rb") as audio_file:
+                audio_bytes = audio_file.read()
+                st.audio(audio_bytes, format="audio/mp3")
+                st.download_button(
+                    label="Download audio",
+                    data=audio_bytes,
+                    file_name="narration.mp3",
+                    mime="audio/mp3",
+                )
+
+            final_audio_path.unlink()
+        else:
+            st.error("Nenhum áudio foi gerado.")
+
     except Exception as e:
         st.error(f"Ocorreu um erro: {str(e)}")
 
-# Criação dos botões para cada voz
 cols = st.columns(3)
 for idx, voz in enumerate(vozes_disponiveis):
     with cols[idx % 3]:
-        st.button(f"Voz {voz.capitalize()}", on_click=converter_texto_em_audio, args=(voz,), key=f"btn_{voz}")
+        st.button(f"Voz {voz.capitalize()}",
+                  on_click=converter_texto_em_audio,
+                  args=(voz, ),
+                  key=f"btn_{voz}",
+                  type="primary")
 
-# Link para amostras de voz
-st.markdown("Confira as [amostras de voz](https://platform.openai.com/docs/guides/text-to-speech) disponíveis.")
