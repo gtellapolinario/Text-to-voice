@@ -1,4 +1,3 @@
-import os
 import tempfile
 from pathlib import Path
 
@@ -8,8 +7,6 @@ from pydub import AudioSegment
 
 st.set_page_config(page_title="Conversor de Texto em Áudio OpenAI",
                    page_icon="🤖")
-
-my_secret = os.environ['OPENAI_API_KEY']
 
 # Configuração da barra lateral
 with st.sidebar:
@@ -29,13 +26,10 @@ velocidade_voz = st.slider("Velocidade da voz:", 0.25, 4.0, 1.0)
 vozes_disponiveis = [
     'alloy', 'echo', 'fable', 'onyx',
     'nova', 'shimmer', "ash", 'ballad',
-    'coral', 'sage']
+    'coral', 'sage'
+]
 
 def split_text(text, max_length=4096):
-    """
-    Divide o texto em chunks de tamanho máximo especificado.
-    Tenta dividir no último espaço antes do limite para evitar cortar palavras.
-    """
     chunks = []
     start = 0
     while start < len(text):
@@ -51,15 +45,15 @@ def split_text(text, max_length=4096):
     return chunks
 
 def converter_texto_em_audio(voice):
-    if openai_api_key is not None:
-        client = OpenAI(api_key=openai_api_key)
-    else:
-        st.error("Por favor, insira sua chave API OpenAI na barra lateral.")
+    if not openai_api_key:
+        st.error("⚠️ Por favor, insira sua chave API OpenAI na barra lateral.")
         return
     if not texto_usuario.strip():
-        st.error("Por favor, insira algum texto para converter.")
+        st.error("⚠️ Por favor, insira algum texto para converter.")
         return
+
     try:
+        client = OpenAI(api_key=openai_api_key)
         chunks = split_text(texto_usuario, max_length=4096)
         st.info(f"Texto dividido em {len(chunks)} partes.")
 
@@ -67,33 +61,29 @@ def converter_texto_em_audio(voice):
 
         for idx, chunk in enumerate(chunks):
             st.write(f"Processando parte {idx + 1} de {len(chunks)}...")
-            with tempfile.NamedTemporaryFile(delete=False,
-                                             suffix=".mp3") as temp_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
                 temp_path = Path(temp_file.name)
+
             with client.audio.speech.with_streaming_response.create(
-                    model=model_selection,
-                    voice=voice,
-                    input=chunk,
-                    speed=velocidade_voz,
+                model=model_selection,
+                voice=voice,
+                input=chunk,
+                speed=velocidade_voz,
             ) as response:
                 response.stream_to_file(temp_path)
-            # Carregar o segmento de áudio usando pydub
+
             segment = AudioSegment.from_mp3(temp_path)
             audio_segments.append(segment)
-
-            # Remover o arquivo temporário
             temp_path.unlink()
 
         if audio_segments:
-            # Concatenar todos os segmentos
             audio_completo = audio_segments[0]
             for segment in audio_segments[1:]:
                 audio_completo += segment
 
-            # Exportar o áudio completo para um arquivo temporário
-            with tempfile.NamedTemporaryFile(
-                    delete=False, suffix=".mp3") as final_audio_file:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as final_audio_file:
                 final_audio_path = Path(final_audio_file.name)
+
             audio_completo.export(final_audio_path, format="mp3")
 
             with open(final_audio_path, "rb") as audio_file:
@@ -114,8 +104,10 @@ def converter_texto_em_audio(voice):
 cols = st.columns(3)
 for idx, voz in enumerate(vozes_disponiveis):
     with cols[idx % 3]:
-        st.button(f"Voz {voz.capitalize()}",
-                  on_click=converter_texto_em_audio,
-                  args=(voz, ),
-                  key=f"btn_{voz}",
-                  type="primary")
+        st.button(
+            f"Voz {voz.capitalize()}",
+            on_click=converter_texto_em_audio,
+            args=(voz,),
+            key=f"btn_{voz}",
+            type="primary"
+        )
