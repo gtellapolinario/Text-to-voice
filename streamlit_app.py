@@ -51,9 +51,10 @@ def split_text(text, max_length=4096):
     return chunks
 
 def converter_texto_em_audio(voice):
-    client = OpenAI(api_key=openai_api_key)
-    if not openai_api_key:
-        st.error("Por favor, insira sua chave API OpenAI na barra lateral.")
+    if openai_api_key is not None:
+      client = OpenAI(api_key=openai_api_key)
+    else:
+      st.error("Por favor, insira sua chave API OpenAI na barra lateral.")
         return
     if not texto_usuario.strip():
         st.error("Por favor, insira algum texto para converter.")
